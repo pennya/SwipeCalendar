@@ -48,6 +48,10 @@ public class CalendarUtils {
         return calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
     }
 
+    public static boolean isSameMonth(Calendar calendar, Calendar calendar2) {
+        return getYear(calendar) == getYear(calendar2) && getMonth(calendar) == getMonth(calendar2);
+    }
+
     public static String[] getWeekDaysAbbreviation(int firstDayOfWeek) {
         if (firstDayOfWeek < 1 || firstDayOfWeek > 7) {
             throw new IllegalArgumentException("Day must be from Java Calendar class");

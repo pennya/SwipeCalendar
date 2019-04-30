@@ -101,10 +101,12 @@ public class SwipeCalendarView extends View {
         drawMonth(canvas, FOCUSED_MONTH);
 
         if (offset > 0) {
+            System.out.println("draw PREVIOUS_MONTH ");
             drawMonth(canvas, PREVIOUS_MONTH);
         }
 
         if (offset < 0) {
+            System.out.println("draw NEXT_MONTH ");
             drawMonth(canvas, NEXT_MONTH);
         }
     }
@@ -178,15 +180,44 @@ public class SwipeCalendarView extends View {
         if (scroller.computeScrollOffset()) {
             offset = scroller.getCurrX();
             invalidate();
+            if (offset == scroller.getFinalX()) {
+                scroller.forceFinished(true);
+            }
         }
     }
 
     public void moveToday() {
-
+        //TODO 오늘 날짜로 이동
     }
 
-    public void moveSelectedDay(Calendar calendar) {
+    private int currentMonth = -1;
 
+    public void moveSelectedDay(Calendar calendar) {
+        System.out.println("offset " + offset);
+
+        int day = calendar.get(Calendar.DATE);
+        int tempMonth = calendar.get(Calendar.MONTH);
+        if(currentMonth == -1) {
+            currentMonth = tempMonth;
+        }
+
+        if(tempMonth > currentMonth) {
+            currentMonth= tempMonth;
+            monthPager.goForward(day);
+            dispatchOnMonthChanged(monthPager.getCalendarMonth(FOCUSED_MONTH).getCalendar());
+            resizeView(getMonthRowsCount(monthPager.getCalendarMonth(FOCUSED_MONTH)));
+            ViewCompat.postInvalidateOnAnimation(this);
+        } else if(tempMonth < currentMonth) {
+            currentMonth= tempMonth;
+            monthPager.goBack(day);
+            dispatchOnMonthChanged(monthPager.getCalendarMonth(FOCUSED_MONTH).getCalendar());
+            resizeView(getMonthRowsCount(monthPager.getCalendarMonth(FOCUSED_MONTH)));
+            ViewCompat.postInvalidateOnAnimation(this);
+        }
+
+
+        monthPager.selectDay(day);
+        invalidate();
     }
 
     private void init() {
@@ -266,6 +297,8 @@ public class SwipeCalendarView extends View {
                     offset = -width;
                 }
 
+                System.out.println("offset " + offset);
+
                 invalidate();
                 return true;
             }
@@ -316,11 +349,10 @@ public class SwipeCalendarView extends View {
             canvas.drawText(Integer.toString(day), crd[0], crd[1],
                     isCurrentDay || isSelectedDay ? textInsideCirclePaint : isSunday ? sundayTextPaint : textPaint);
 
-            List<CalendarEvent> events = new ArrayList<>();
-            events.add(new CalendarEvent(System.currentTimeMillis(), Color.BLACK) {});
-            events.add(new CalendarEvent(System.currentTimeMillis(), Color.BLUE) {});
-            events.add(new CalendarEvent(System.currentTimeMillis(), Color.RED) {});
-            drawEventsOfDay(canvas, events, crd, day);
+            List<CalendarEvent> events = calendarMonth.getEventOfDay(day);
+            if (events != null && !isCurrentDay && !isSelectedDay) {
+                drawEventsOfDay(canvas, events, crd, day);
+            }
         }
     }
 
@@ -438,7 +470,7 @@ public class SwipeCalendarView extends View {
                 return;
             }
 
-            monthPager.goBack();
+            monthPager.goBack(1);
 
             int distance = getWidth() - offset;
             offset = offset - getWidth();
@@ -457,7 +489,7 @@ public class SwipeCalendarView extends View {
                 return;
             }
 
-            monthPager.goForward();
+            monthPager.goForward(1);
 
             int distance = -getWidth() - offset;
             offset = offset + getWidth();
@@ -480,14 +512,18 @@ public class SwipeCalendarView extends View {
     public void setOnDateSelectedListener(OnDateSelectedListener onDateSelectedListener) {
         this.onDateSelectedListener = onDateSelectedListener;
 
-        CalendarMonth calendarMonth = monthPager.getCalendarMonth(FOCUSED_MONTH);
+        /*CalendarMonth calendarMonth = monthPager.getCalendarMonth(FOCUSED_MONTH);
         dispatchOnDateSelected(calendarMonth.getCalendar(),
-                calendarMonth.getEventOfDay(monthPager.getSelectedDay()));
+                calendarMonth.getEventOfDay(monthPager.getSelectedDay()));*/
     }
 
     public void setOnMonthChangedListener(OnMonthChangedListener onMonthChangedListener) {
         this.onMonthChangedListener = onMonthChangedListener;
         dispatchOnMonthChanged(monthPager.getCalendarMonth(FOCUSED_MONTH).getCalendar());
+    }
+
+    public void setOnLoadEventsListener(OnLoadEventsListener onLoadEventsListener) {
+        monthPager.setOnLoadEventsListener(onLoadEventsListener);
     }
 
     private void dispatchOnDateSelected(Calendar calendar, List<CalendarEvent> eventsOfDay) {

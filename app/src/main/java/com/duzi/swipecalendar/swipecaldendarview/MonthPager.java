@@ -1,8 +1,17 @@
 package com.duzi.swipecalendar.swipecaldendarview;
 
 
+import android.util.SparseArray;
+
 import com.duzi.swipecalendar.swipecaldendarview.util.CalendarUtils;
+
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
+
+import static com.duzi.swipecalendar.swipecaldendarview.MonthIndex.FOCUSED_MONTH;
+import static com.duzi.swipecalendar.swipecaldendarview.MonthIndex.NEXT_MONTH;
+import static com.duzi.swipecalendar.swipecaldendarview.MonthIndex.PREVIOUS_MONTH;
 
 class MonthPager {
 
@@ -13,6 +22,8 @@ class MonthPager {
     private CalendarMonth previousMonth;
     private CalendarMonth focusedMonth;
     private CalendarMonth nextMonth;
+
+    private OnLoadEventsListener onLoadEventsListener;
 
     MonthPager(int firstDayOfWeek) {
         this.firstDayOfWeek = firstDayOfWeek;
@@ -47,12 +58,53 @@ class MonthPager {
                 .setCalendar(calendar)
                 .build();
 
+        loadEventsForMonth(month);
         return month;
     }
 
-    void goForward() {
+    private void loadEventsForMonth(CalendarMonth calendarMonth) {
+        if (onLoadEventsListener == null) {
+            return;
+        }
+
+        List<? extends CalendarEvent> monthEvents = onLoadEventsListener
+                .onLoadEvents(calendarMonth.getYear(), calendarMonth.getMonth());
+
+        if (monthEvents == null) {
+            return;
+        }
+
+        // Events sorted by : (key) day of month - (value) events of day
+        SparseArray<List<CalendarEvent>> eventsByDay = new SparseArray<>();
+
+        Calendar eventCalendar = Calendar.getInstance();
+        for (CalendarEvent calendarEvent : monthEvents) {
+            eventCalendar.setTimeInMillis(calendarEvent.getTimeInMillis());
+
+            if (CalendarUtils.isSameMonth(eventCalendar, calendarMonth.getCalendar())) {
+                // Key
+                int dayOfMonth = CalendarUtils.getDayOfMonth(eventCalendar);
+
+                // Value
+                List<CalendarEvent> eventsOfDay = eventsByDay.get(dayOfMonth);
+
+                if (eventsOfDay == null) {
+                    eventsOfDay = new ArrayList<>();
+                    eventsOfDay.add(calendarEvent);
+                    eventsByDay.put(dayOfMonth, eventsOfDay);
+                } else {
+                    eventsOfDay.add(calendarEvent);
+                }
+            }
+        }
+
+        calendarMonth.setEvents(eventsByDay);
+    }
+
+
+    void goForward(int day) {
         // Select first day of month after change of month
-        selectDay(1);
+        selectDay(day);
 
         previousMonth = focusedMonth;
         focusedMonth = nextMonth;
@@ -63,9 +115,9 @@ class MonthPager {
         nextMonth = buildCalendarMonth(calendar);
     }
 
-    void goBack() {
+    void goBack(int day) {
         // Select first day of month after change of month
-        selectDay(1);
+        selectDay(day);
 
         nextMonth = focusedMonth;
         focusedMonth = previousMonth;
@@ -91,6 +143,15 @@ class MonthPager {
         }
 
         return null;
+    }
+
+    void setOnLoadEventsListener(OnLoadEventsListener listener) {
+        onLoadEventsListener = listener;
+
+        // Invalidate
+        loadEventsForMonth(getCalendarMonth(PREVIOUS_MONTH));
+        loadEventsForMonth(getCalendarMonth(FOCUSED_MONTH));
+        loadEventsForMonth(getCalendarMonth(NEXT_MONTH));
     }
 
     boolean isOnCurrentMonth(MonthIndex monthIndex) {

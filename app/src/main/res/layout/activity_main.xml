@@ -29,15 +29,17 @@
             android:textStyle="bold"
             tools:text="2019.04"/>
 
-        <android.support.design.widget.FloatingActionButton
+        <Button
             android:id="@+id/btnAddSchedule"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            android:backgroundTint="@color/black"
-            android:src="@drawable/ic_add_white_24dp"/>
+            android:background="@color/black"
+            android:drawableRight="@drawable/ic_add_white_24dp"
+            android:textColor="@color/white"
+            android:text="일정추가"/>
 
     </android.support.constraint.ConstraintLayout>
 

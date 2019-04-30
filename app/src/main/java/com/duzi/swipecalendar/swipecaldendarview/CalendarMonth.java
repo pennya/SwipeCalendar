@@ -8,7 +8,6 @@ import java.util.List;
 public class CalendarMonth {
     private int year;
     private int month;
-    private int day;
     private int amountOfDays;
     private int firstWeekDay;
 
@@ -21,7 +20,6 @@ public class CalendarMonth {
     private CalendarMonth(Builder builder) {
         year = builder.year;
         month = builder.month;
-        day = builder.day;
         amountOfDays = builder.amountOfDays;
         firstWeekDay = builder.firstWeekDay;
         calendar = builder.calendar;
@@ -34,8 +32,6 @@ public class CalendarMonth {
     public int getMonth() {
         return month;
     }
-
-    public int getDay() { return day; }
 
     public int getAmountOfDays() {
         return amountOfDays;
@@ -57,7 +53,7 @@ public class CalendarMonth {
     }
 
     public void setEvents(SparseArray<List<CalendarEvent>> events) {
-        events = events;
+        this.events = events;
     }
 
     public int getDayIndex(int dayOfMonth) {
@@ -71,7 +67,6 @@ public class CalendarMonth {
     static class Builder {
         private int year;
         private int month;
-        private int day;
         private int amountOfDays;
         private int firstWeekDay;
         private Calendar calendar;
@@ -83,11 +78,6 @@ public class CalendarMonth {
 
         public Builder setMonth(int month) {
             this.month = month;
-            return this;
-        }
-
-        public Builder setDay(int day) {
-            this.day = day;
             return this;
         }
 
