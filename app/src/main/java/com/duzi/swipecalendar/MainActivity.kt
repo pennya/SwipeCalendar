@@ -9,6 +9,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var selectedDay: Calendar
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -20,6 +22,7 @@ class MainActivity : AppCompatActivity() {
     fun initLayout() {
 
         calendarView.setOnDateSelectedListener{ dayCalendar, events ->
+            selectedDay = dayCalendar
             println("dayCalendar : ${dayCalendar.timeInMillis} ${dayCalendar.get(Calendar.YEAR)} ${dayCalendar.get(Calendar.MONTH)} ${dayCalendar.get(Calendar.DATE)}")
         }
 
@@ -30,7 +33,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnAddSchedule.setOnClickListener {
-            startActivity(Intent(this@MainActivity, ScheduleAddActivity::class.java))
+            if(::selectedDay.isInitialized) {
+                val intent = Intent(this@MainActivity, ScheduleAddActivity::class.java)
+                val bundle = Bundle()
+                bundle.putLong(TIMESTAMP, selectedDay.timeInMillis)
+                intent.putExtras(bundle)
+                startActivity(intent)
+            }
         }
+    }
+
+    companion object {
+        const val TIMESTAMP = "TIMESTAMP"
     }
 }
