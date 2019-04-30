@@ -1,14 +1,12 @@
 package com.duzi.swipecalendar.content
 
-import android.content.Context
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentManager
 import android.support.v4.app.FragmentStatePagerAdapter
 import com.duzi.swipecalendar.MyEvent
 import com.duzi.swipecalendar.swipecaldendarview.CalendarEvent
 
-class ContentViewPagerAdapter(private val context: Context,
-                              fm: FragmentManager,
+class ContentViewPagerAdapter(fm: FragmentManager,
                               private val list: ArrayList<MyEvent>): FragmentStatePagerAdapter(fm) {
 
     override fun getItem(position: Int): Fragment {
@@ -32,9 +30,10 @@ class ContentViewPagerAdapter(private val context: Context,
         return -1
     }
 
-    fun findItem(event: MyEvent): Int {
+    fun findItem(event: MyEvent, timeInMillis: Long): Int {
         for(i in 0 until list.size) {
             if(list[i] == event) {
+                println("${timeInMillis} ${(event as CalendarEvent).timeInMillis}")
                 return i
             }
         }

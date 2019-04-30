@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.view.ViewPager
 import android.support.v7.app.AppCompatActivity
+import android.view.View
 import com.duzi.swipecalendar.content.ContentViewPagerAdapter
 import com.duzi.swipecalendar.swipecaldendarview.CalendarEvent
 import kotlinx.android.synthetic.main.activity_main.*
@@ -15,6 +16,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var selectedDay: Calendar
     private lateinit var adapter: ContentViewPagerAdapter
     private val cachedEvents = arrayListOf<MyEvent>()
+    private var selectFlag = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -28,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         viewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
             override fun onPageScrollStateChanged(p0: Int) {
+                noContent.visibility = View.GONE
                 // nothing
             }
 
@@ -37,14 +40,15 @@ class MainActivity : AppCompatActivity() {
 
             override fun onPageSelected(position: Int) {
                 // move calendar
+                /*println("onPageSelected")
                 val temp = Calendar.getInstance()
                 temp.timeInMillis = (cachedEvents[position] as CalendarEvent).timeInMillis
-                calendarView.moveSelectedDay(temp)
+                calendarView.moveSelectedDay(temp)*/
             }
 
         })
 
-        adapter = ContentViewPagerAdapter(this, supportFragmentManager, arrayListOf())
+        adapter = ContentViewPagerAdapter(supportFragmentManager, arrayListOf())
         viewPager.adapter = adapter
 
 
@@ -52,17 +56,21 @@ class MainActivity : AppCompatActivity() {
             selectedDay = dayCalendar
             println("dayCalendar : ${dayCalendar.timeInMillis} ${dayCalendar.get(Calendar.YEAR)} ${dayCalendar.get(Calendar.MONTH)} ${dayCalendar.get(Calendar.DATE)}")
 
-            //val index = adapter.findItem(dayCalendar.timeInMillis)
-            //viewPager.currentItem = index
             events?.run {
+                noContent.visibility = View.GONE
                 for(event in events.iterator()) {
+                    selectFlag = true
                     val myEvent = event as MyEvent
                     println("events : ${myEvent.getTitle()} ${myEvent.getContent()}")
 
-                    val index = adapter.findItem(myEvent)
+                    val index = adapter.findItem(myEvent, (event as CalendarEvent).timeInMillis)
+                    println("index $index")
                     viewPager.currentItem = index
+                    return@setOnDateSelectedListener
                 }
             }
+
+            noContent.visibility = View.VISIBLE
         }
 
         calendarView.setOnMonthChangedListener { monthCalendar: Calendar? ->

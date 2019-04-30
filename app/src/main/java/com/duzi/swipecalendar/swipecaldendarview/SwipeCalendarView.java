@@ -193,10 +193,11 @@ public class SwipeCalendarView extends View {
     private int currentMonth = -1;
 
     public void moveSelectedDay(Calendar calendar) {
-        System.out.println("offset " + offset);
 
         int day = calendar.get(Calendar.DATE);
         int tempMonth = calendar.get(Calendar.MONTH);
+
+        System.out.println(String.format("month %d  day %d   current month %d", tempMonth, day, currentMonth));
         if(currentMonth == -1) {
             currentMonth = tempMonth;
         }
@@ -471,6 +472,7 @@ public class SwipeCalendarView extends View {
             }
 
             monthPager.goBack(1);
+            currentMonth -= 1;
 
             int distance = getWidth() - offset;
             offset = offset - getWidth();
@@ -490,6 +492,7 @@ public class SwipeCalendarView extends View {
             }
 
             monthPager.goForward(1);
+            currentMonth += 1;
 
             int distance = -getWidth() - offset;
             offset = offset + getWidth();
@@ -511,10 +514,6 @@ public class SwipeCalendarView extends View {
 
     public void setOnDateSelectedListener(OnDateSelectedListener onDateSelectedListener) {
         this.onDateSelectedListener = onDateSelectedListener;
-
-        /*CalendarMonth calendarMonth = monthPager.getCalendarMonth(FOCUSED_MONTH);
-        dispatchOnDateSelected(calendarMonth.getCalendar(),
-                calendarMonth.getEventOfDay(monthPager.getSelectedDay()));*/
     }
 
     public void setOnMonthChangedListener(OnMonthChangedListener onMonthChangedListener) {
